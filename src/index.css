@@ -6,7 +6,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: linear-gradient(135deg, #fef5f5 0%, #fce8e8 100%);
+  background: linear-gradient(135deg, #fdf4f7 0%, #fce4ec 100%);
   min-height: 100vh;
   padding: 20px;
 }
@@ -19,12 +19,12 @@ body {
 .app {
   background: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(211, 47, 47, 0.15);
+  box-shadow: 0 10px 40px rgba(194, 24, 91, 0.15);
   overflow: hidden;
 }
 
 .header {
-  background: #D32F2F;
+  background: #C2185B;
   color: white;
   padding: 40px;
   text-align: center;
@@ -81,8 +81,8 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #D84545;
-  box-shadow: 0 0 0 3px rgba(216, 69, 69, 0.1);
+  border-color: #C2185B;
+  box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.1);
 }
 
 .form-group textarea {
@@ -107,7 +107,7 @@ body {
 }
 
 .btn {
-  background: linear-gradient(135deg, #D84545 0%, #E05555 100%);
+  background: linear-gradient(135deg, #C2185B 0%, #D81B60 100%);
   color: white;
   border: none;
   padding: 15px 40px;
@@ -116,12 +116,12 @@ body {
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   font-weight: 600;
-  box-shadow: 0 4px 15px rgba(216, 69, 69, 0.3);
+  box-shadow: 0 4px 15px rgba(194, 24, 91, 0.3);
 }
 
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(216, 69, 69, 0.4);
+  box-shadow: 0 6px 20px rgba(194, 24, 91, 0.4);
 }
 
 .btn:disabled {
@@ -143,7 +143,7 @@ body {
 .loading {
   text-align: center;
   padding: 40px;
-  color: #D84545;
+  color: #C2185B;
   font-size: 1.2rem;
 }
 
@@ -158,18 +158,18 @@ body {
 }
 
 .program-card {
-  background: #fffbfb;
+  background: #fffbfd;
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 20px;
-  border-left: 5px solid #D84545;
-  box-shadow: 0 2px 10px rgba(211, 47, 47, 0.08);
+  border-left: 5px solid #C2185B;
+  box-shadow: 0 2px 10px rgba(194, 24, 91, 0.08);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .program-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(211, 47, 47, 0.15);
+  box-shadow: 0 4px 20px rgba(194, 24, 91, 0.15);
 }
 
 .program-header {
@@ -186,13 +186,13 @@ body {
 }
 
 .fit-score {
-  background: linear-gradient(135deg, #D84545 0%, #E05555 100%);
+  background: linear-gradient(135deg, #C2185B 0%, #D81B60 100%);
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.9rem;
-  box-shadow: 0 2px 8px rgba(216, 69, 69, 0.3);
+  box-shadow: 0 2px 8px rgba(194, 24, 91, 0.3);
 }
 
 .eligibility {
@@ -312,7 +312,7 @@ body {
 .count-number {
   font-size: 3rem;
   font-weight: 700;
-  color: #D32F2F;
+  color: #C2185B;
 }
 
 .count-label {
@@ -365,7 +365,7 @@ body {
 }
 
 .program-card.compact .card-header:hover {
-  background: #fff5f5;
+  background: #fdf4f7;
 }
 
 .card-main-info {
@@ -416,7 +416,7 @@ body {
 }
 
 .source-link:hover {
-  color: #D32F2F;
+  color: #C2185B;
 }
 
 .card-score-section {
@@ -513,7 +513,7 @@ body {
   content: "•";
   position: absolute;
   left: 0;
-  color: #D32F2F;
+  color: #C2185B;
   font-weight: bold;
 }
 
@@ -603,12 +603,12 @@ body {
 }
 
 .btn-back:hover {
-  border-color: #D32F2F;
-  color: #D32F2F;
+  border-color: #C2185B;
+  color: #C2185B;
 }
 
 .detail-header {
-  background: linear-gradient(135deg, #fffbfb 0%, #fff5f5 100%);
+  background: linear-gradient(135deg, #fffbfd 0%, #fdf4f7 100%);
   border-radius: 12px;
   padding: 25px;
   display: flex;
@@ -616,7 +616,7 @@ body {
   align-items: flex-start;
   gap: 20px;
   margin-bottom: 20px;
-  border-left: 5px solid #D32F2F;
+  border-left: 5px solid #C2185B;
 }
 
 .detail-header-main h2 {
@@ -670,7 +670,7 @@ body {
 
 .source-btn {
   display: inline-block;
-  background: #D32F2F;
+  background: #C2185B;
   color: white;
   padding: 10px 20px;
   border-radius: 25px;
@@ -681,7 +681,7 @@ body {
 }
 
 .source-btn:hover {
-  background: #b71c1c;
+  background: #AD1457;
   transform: translateY(-1px);
 }
 
@@ -784,7 +784,7 @@ body {
 .step-number {
   width: 28px;
   height: 28px;
-  background: #D32F2F;
+  background: #C2185B;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -827,7 +827,7 @@ body {
 }
 
 .contact-item a {
-  color: #D32F2F;
+  color: #C2185B;
   text-decoration: none;
   font-size: 0.9rem;
 }
@@ -1163,7 +1163,7 @@ body {
   margin-top: 5px;
   font-weight: 700;
   font-size: 1.1rem;
-  color: #D32F2F;
+  color: #C2185B;
 }
 
 .cost-disclaimer {
@@ -1498,7 +1498,7 @@ body {
 }
 
 .project-cta {
-  background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+  background: linear-gradient(135deg, #fdf4f7 0%, #fce4ec 100%);
   padding: 25px;
   border-radius: 12px;
   text-align: center;
@@ -1566,14 +1566,14 @@ body {
 }
 
 .tool-card-inline:hover {
-  border-color: #D32F2F;
+  border-color: #C2185B;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .tool-card-inline.active {
-  border-color: #D32F2F;
-  background: #fff5f5;
+  border-color: #C2185B;
+  background: #fdf4f7;
 }
 
 .tool-card-icon {
