@@ -57,15 +57,17 @@ function App() {
   return (
     <div className="app">
       <header className="header">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginBottom: '10px' }}>
+        <div className="header-content">
           <img 
             src="/logo.png" 
             alt="SPIEL-BAU Logo" 
-            style={{ height: '80px', width: 'auto' }}
+            className="header-logo"
           />
-          <h1 style={{ margin: 0 }}>Fördermittel-Finder</h1>
+          <div className="header-text">
+            <h1>Fördermittel-Finder</h1>
+            <p>Finden Sie die passende Förderung für Ihr Projekt</p>
+          </div>
         </div>
-        <p>Finden Sie die passende Förderung für Ihr Projekt</p>
       </header>
       
       <div className="container">

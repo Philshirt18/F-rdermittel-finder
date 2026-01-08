@@ -26,19 +26,36 @@ body {
 .header {
   background: #C2185B;
   color: white;
-  padding: 40px;
-  text-align: center;
+  padding: 30px 40px;
+  text-align: left;
 }
 
-.header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-logo {
+  height: 120px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.header-text h1 {
+  font-size: 3rem;
+  margin: 0 0 10px 0;
   font-weight: 700;
+  line-height: 1.1;
 }
 
-.header p {
-  font-size: 1.1rem;
+.header-text p {
+  font-size: 1.3rem;
   opacity: 0.95;
+  margin: 0;
+  font-weight: 400;
 }
 
 .container {
@@ -584,6 +601,24 @@ body {
     width: 100%;
     justify-content: space-between;
     margin-top: 15px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .header-logo {
+    height: 80px;
+  }
+
+  .header-text h1 {
+    font-size: 2.2rem;
+  }
+
+  .header-text p {
+    font-size: 1.1rem;
   }
 }
 
