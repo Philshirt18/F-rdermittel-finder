@@ -11,15 +11,6 @@ export const exportToPDF = (results) => {
   doc.text('Fördermittel-Empfehlungen', 20, y);
   y += 15;
   
-  // Project info
-  doc.setFontSize(12);
-  doc.text(`Projekt: ${projectData.description}`, 20, y);
-  y += 7;
-  doc.text(`Typ: ${projectData.projectType}`, 20, y);
-  y += 7;
-  doc.text(`Bundesland: ${projectData.federalState}`, 20, y);
-  y += 15;
-  
   // Programs
   doc.setFontSize(16);
   doc.text('Empfohlene Programme:', 20, y);
@@ -44,6 +35,32 @@ export const exportToPDF = (results) => {
       y = 20;
     }
   });
+  
+  // Add Spiel Bau GmbH contact info at the bottom
+  if (y > 200) {
+    doc.addPage();
+    y = 20;
+  } else {
+    y += 20; // Add some space before contact info
+  }
+  
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('Spiel Bau GmbH unterstützt Sie gerne bei der professionellen Planung Ihres Spielplatzes.', 20, y);
+  y += 10;
+  
+  doc.setFont(undefined, 'normal');
+  doc.text('Besuchen Sie uns auf www.spiel-bau.de', 20, y);
+  y += 10;
+  
+  doc.setFontSize(10);
+  doc.text('Kontakt:', 20, y);
+  y += 7;
+  doc.text('Tel: 03381-2614-0', 20, y);
+  y += 5;
+  doc.text('Fax: 03381-2614-18', 20, y);
+  y += 5;
+  doc.text('Mail: info@spiel-bau.de', 20, y);
   
   doc.save('foerdermittel-empfehlungen.pdf');
 };

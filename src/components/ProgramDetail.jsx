@@ -78,11 +78,6 @@ const ProgramDetail = ({ program, projectData, onBack }) => {
       {/* Quick Info */}
       <div className="quick-info">
         <p>{program.description}</p>
-        {program.source && (
-          <a href={program.source} target="_blank" rel="noopener noreferrer" className="source-btn">
-            🔗 Offizielle Quelle öffnen
-          </a>
-        )}
       </div>
 
       {/* Collapsible Sections */}
@@ -148,14 +143,6 @@ const ProgramDetail = ({ program, projectData, onBack }) => {
                     {contact.organization && <p>{contact.organization}</p>}
                   </div>
                 ))}
-                {program.source && (
-                  <div className="contact-source-hint">
-                    <p>📍 Kontaktdaten finden Sie auf der offiziellen Seite:</p>
-                    <a href={program.source} target="_blank" rel="noopener noreferrer">
-                      {program.source}
-                    </a>
-                  </div>
-                )}
               </div>
             )}
           </div>

@@ -1,0 +1,117 @@
+{
+  "delete": [],
+
+  "core": [
+    {"name": "GAK - Förderung der Dorfentwicklung", "state": "DE", "level": "federal"},
+    {"name": "LEADER - EU-Förderung für ländliche Regionen", "state": "DE", "level": "federal"},
+    {"name": "BULEplus - Soziale Dorfentwicklung", "state": "DE", "level": "federal"},
+    {"name": "Deutsches Kinderhilfswerk - Themenfonds Spielraum", "state": "DE", "level": "federal"},
+    {"name": "Deutsches Kinderhilfswerk - Spielplatz-Initiative", "state": "DE", "level": "federal"},
+
+    {"name": "Investitionspakt BW - Soziale Integration im Quartier", "state": "BW"},
+    {"name": "Entwicklungsprogramm Ländlicher Raum (ELR) BW", "state": "BW"},
+    {"name": "LEADER Baden-Württemberg", "state": "BW"},
+    {"name": "Regionalbudget Baden-Württemberg", "state": "BW"},
+    {"name": "Baden-Württemberg Sportstättenförderung", "state": "BW"},
+
+    {"name": "Dorferneuerung Bayern", "state": "BY"},
+    {"name": "LEADER Bayern 2023-2027", "state": "BY"},
+    {"name": "Regionalbudget Bayern", "state": "BY"},
+    {"name": "Kita- und Spielplatzsanierungsprogramm Bayern (KSSP)", "state": "BY"},
+    {"name": "Landesförderprogramm Sport Bayern", "state": "BY"},
+
+    {"name": "Grünflächen und Spielplätze in der Nachbarschaft (Berlin)", "state": "BE"},
+
+    {"name": "LEADER Brandenburg", "state": "BB"},
+    {"name": "Integrierte ländliche Entwicklung Brandenburg (ILE)", "state": "BB"},
+    {"name": "ILB - Zusammenhalt in kleinen Gemeinden", "state": "BB"},
+
+    {"name": "Spielraumförderung Bremen", "state": "HB"},
+    {"name": "Länderfonds Bremen - SpielRäume schaffen (DKHW)", "state": "HB"},
+    {"name": "Wohnen in Nachbarschaften (WiN) Bremen", "state": "HB"},
+    {"name": "Landesprogramm Lebendige Quartiere Bremerhaven", "state": "HB"},
+
+    {"name": "Gemeinschaftsfonds Hamburger Spielräume", "state": "HH"},
+    {"name": "Investitionspakt Soziale Integration im Quartier (Hamburg)", "state": "HH"},
+    {"name": "Quartiersfonds Hamburg", "state": "HH"},
+
+    {"name": "Dorfentwicklung Hessen", "state": "HE"},
+    {"name": "STARKES DORF+ Hessen", "state": "HE"},
+    {"name": "Sportstättenbau Hessen", "state": "HE"},
+
+    {"name": "Spielplatzförderung Mecklenburg-Vorpommern", "state": "MV"},
+    {"name": "LEADER Mecklenburg-Vorpommern", "state": "MV"},
+    {"name": "Integrierte ländliche Entwicklung M-V (ILERL)", "state": "MV"},
+    {"name": "GAK-Regionalbudget Mecklenburg-Vorpommern", "state": "MV"},
+    {"name": "Bürgerfonds Mecklenburg-Vorpommern - Spielplätze", "state": "MV"},
+
+    {"name": "ZILE - Dorfentwicklung Niedersachsen", "state": "NI"},
+    {"name": "ZILE - Basisdienstleistungen Niedersachsen", "state": "NI"},
+    {"name": "LEADER Niedersachsen (KLARA)", "state": "NI"},
+    {"name": "Sportstättenbauförderung Niedersachsen", "state": "NI"},
+
+    {"name": "Struktur- und Dorfentwicklung NRW", "state": "NW"},
+    {"name": "Regionalbudget für Kleinprojekte NRW", "state": "NW"},
+    {"name": "LEADER Nordrhein-Westfalen 2023-2027", "state": "NW"},
+    {"name": "NRW Sportstättenförderung", "state": "NW"},
+
+    {"name": "Dorferneuerung Rheinland-Pfalz (kommunal)", "state": "RP"},
+    {"name": "LEADER Rheinland-Pfalz", "state": "RP"},
+    {"name": "Regionalbudget (GAK) Rheinland-Pfalz", "state": "RP"},
+    {"name": "Sportstättenförderprogramm Land in Bewegung (RLP)", "state": "RP"},
+
+    {"name": "Öffentliche Dorferneuerung Saarland (ELER 2023-2027)", "state": "SL"},
+    {"name": "LEADER Saarland 2023-2027", "state": "SL"},
+    {"name": "Investitionspakt Soziale Integration im Quartier (Saarland)", "state": "SL"},
+
+    {"name": "Vitale Dorfkerne und Ortszentren Sachsen", "state": "SN"},
+    {"name": "Regionalbudgets Sachsen", "state": "SN"},
+    {"name": "LEADER Sachsen", "state": "SN"},
+    {"name": "Förderrichtlinie Ländliche Entwicklung Sachsen (FRL LE/2025)", "state": "SN"},
+    {"name": "Sachsen barrierefrei 2030", "state": "SN"},
+    {"name": "Investitionspakt Sportstätten Sachsen (IVP-Sport)", "state": "SN"},
+
+    {"name": "LEADER Sachsen-Anhalt", "state": "ST"},
+    {"name": "Dorfentwicklung und ländlicher Wegebau Sachsen-Anhalt", "state": "ST"},
+
+    {"name": "GAK-Ortskernentwicklung Schleswig-Holstein", "state": "SH"},
+    {"name": "Förderung des ländlichen Raums SH 2023-2027 (ELER/GAP)", "state": "SH"},
+    {"name": "LEADER 2023-2027 Schleswig-Holstein (AktivRegionen)", "state": "SH"},
+    {"name": "Integrierte ländliche Entwicklung (ILE) Schleswig-Holstein", "state": "SH"},
+
+    {"name": "Dorferneuerung und -entwicklung Thüringen", "state": "TH"},
+    {"name": "LEADER Thüringen (PORTIA)", "state": "TH"},
+    {"name": "Integrierte Ländliche Entwicklung (ILE) Thüringen", "state": "TH"}
+  ],
+
+  "conditional": [
+    {"name": "Städtebauförderung - Lebendige Zentren", "state": "DE"},
+    {"name": "Wachstum und nachhaltige Erneuerung", "state": "DE"},
+
+    {"name": "Städtebauförderung Baden-Württemberg", "state": "BW"},
+    {"name": "Ausgleichstock Baden-Württemberg", "state": "BW"},
+
+    {"name": "Städtebauförderung Bayern", "state": "BY"},
+    {"name": "Städtebauförderung Berlin - Lebendige Zentren", "state": "BE"},
+    {"name": "Städtebauförderung Brandenburg", "state": "BB"},
+    {"name": "Städtebauförderung Bremerhaven", "state": "HB"},
+    {"name": "RISE - Rahmenprogramm Integrierte Stadtteilentwicklung", "state": "HH"},
+    {"name": "Stadtentwicklungsfonds Lebendige Quartiere Hamburg", "state": "HH"},
+    {"name": "RiLiSE - Nachhaltige Stadtentwicklung Hessen", "state": "HE"},
+    {"name": "Lebendige Zentren Hessen", "state": "HE"},
+    {"name": "Städtebauförderung Mecklenburg-Vorpommern", "state": "MV"},
+    {"name": "Städtebauförderung Niedersachsen - Lebendige Zentren", "state": "NI"},
+    {"name": "Städtebauförderung Niedersachsen - Sozialer Zusammenhalt", "state": "NI"},
+    {"name": "Städtebauförderung Niedersachsen - Wachstum und nachhaltige Erneuerung", "state": "NI"},
+    {"name": "Kleinere Städte und Gemeinden - Niedersachsen", "state": "NI"},
+    {"name": "Städtebauförderung Nordrhein-Westfalen", "state": "NW"},
+    {"name": "Städtebauliche Erneuerung Rheinland-Pfalz (RL-StEE)", "state": "RP"},
+    {"name": "Lebendige Zentren Saarland", "state": "SL"},
+    {"name": "Wachstum und nachhaltige Erneuerung Saarland", "state": "SL"},
+    {"name": "Lebendige Zentren Sachsen (LZP)", "state": "SN"},
+    {"name": "Wachstum und nachhaltige Erneuerung Sachsen (WEP)", "state": "SN"},
+    {"name": "Städtebauförderung Sachsen-Anhalt (MID)", "state": "ST"},
+    {"name": "Städtebauförderung Schleswig-Holstein (LZ/SZ/WuNE)", "state": "SH"},
+    {"name": "Städtebauförderung Thüringen", "state": "TH"}
+  ]
+}

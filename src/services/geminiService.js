@@ -1,5 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { fundingPrograms } from '../data/fundingPrograms';
+import { preFilterPrograms } from './preFilterService';
+import { strictFilterPrograms, getStrictProgramNames, strictFilterProgramsWithRelevance } from './strictFilterService';
+import { sortResults, sortAndLimitByRelevance } from './sortService';
+import { simpleFilterPrograms, getSimpleFilterProgramNames } from './simpleFilterService';
+import { assignCategory } from './fundingLogic';
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -25,7 +30,18 @@ const retryApiCall = async (apiCall, maxRetries = 3, delay = 2000) => {
   }
 };
 
-export const analyzeProject = async (projectData) => {
+// Helper function to enhance nextSteps based on project data
+const enhanceNextSteps = (nextSteps) => {
+  // Always use the same standardized next steps
+  const standardNextSteps = [
+    "Detaillierte Planung des Spielplatzes unter Berücksichtigung der Förderrichtlinien",
+    "Prüfung von Zuständigkeit, Einreichungsweg und formalen Anforderungen des Förderantrags"
+  ];
+  
+  return standardNextSteps;
+};
+
+export const analyzeProject = async (projectData, relevanceEngine = null) => {
   try {
     console.log('=== ANALYZE PROJECT v2.0 ===');
     console.log('Project data:', projectData);
@@ -40,42 +56,58 @@ export const analyzeProject = async (projectData) => {
     
     if (!genAI || !apiKey || apiKey === 'your_gemini_api_key_here') {
       console.log('Using mock analysis - reason:', !genAI ? 'no genAI' : !apiKey ? 'no apiKey' : 'placeholder key');
-      return getMockAnalysis(projectData);
+      return getMockAnalysis(projectData, relevanceEngine);
     }
     
     console.log('Using REAL AI analysis with Gemini');
 
     console.log('Total programs in database:', fundingPrograms.length);
     
-    // Filter relevant programs with priority
-    const relevantPrograms = fundingPrograms
-      .filter(program => {
-        // Check if program matches federal state
-        const stateMatch = program.federalStates.includes('all') || 
-                           program.federalStates.includes(projectData.federalState);
-        
-        // Check if program matches project type
-        const typeMatch = program.type.includes(projectData.projectType);
-        
-        return stateMatch && typeMatch;
-      })
-      .sort((a, b) => {
-        // Prioritize state-specific programs over "all"
-        const aIsStateSpecific = a.federalStates.includes(projectData.federalState) && !a.federalStates.includes('all');
-        const bIsStateSpecific = b.federalStates.includes(projectData.federalState) && !b.federalStates.includes('all');
-        
-        if (aIsStateSpecific && !bIsStateSpecific) return -1;
-        if (!aIsStateSpecific && bIsStateSpecific) return 1;
-        return 0;
-      });
+    // SIMPLE FILTERING: Apply new location-based filtering logic
+    console.log('=== APPLYING SIMPLE FILTERING ===');
+    
+    let filteredPrograms;
+    
+    try {
+      // Use the new simple filter service
+      console.log('🎯 Using new simple filter service');
+      filteredPrograms = simpleFilterPrograms(
+        projectData.einsatzbereich,
+        projectData.federalState,
+        fundingPrograms
+      );
+      
+      console.log(`Simple filter result: ${filteredPrograms.length} programs`);
+      console.log('Simple filtered programs:', getSimpleFilterProgramNames(filteredPrograms));
+      
+    } catch (simpleFilterError) {
+      console.error('❌ Simple filtering failed, falling back to legacy:', simpleFilterError);
+      // Fallback to legacy filtering
+      filteredPrograms = strictFilterProgramsWithRelevance(
+        projectData.einsatzbereich,
+        projectData.federalState,
+        fundingPrograms,
+        relevanceEngine
+      );
+    }
+    
+    // If no programs pass filtering, return empty result
+    if (filteredPrograms.length === 0) {
+      console.log('No programs pass filtering criteria');
+      return {
+        programs: [],
+        message: 'Keine Programme entsprechen den Filterkriterien für diesen Einsatzbereich'
+      };
+    }
 
-    console.log(`Filtered ${relevantPrograms.length} relevant programs from ${fundingPrograms.length} total`);
-    console.log('Relevant programs:', relevantPrograms.map(p => p.name));
+    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' }); // Use available model
+    // Use filtered programs (no additional AI selection needed)
+    const programsForAI = filteredPrograms;
+    console.log(`Using ${programsForAI.length} filtered programs for AI evaluation`);
 
     // Create a simplified list for AI with indices
-    const programList = relevantPrograms.map((p, idx) => ({
+    const programList = programsForAI.map((p, idx) => ({
     index: idx,
     name: p.name,
     description: p.description,
@@ -86,33 +118,48 @@ export const analyzeProject = async (projectData) => {
     const prompt = `
 Du bist ein Experte für Fördermittel in Deutschland.
 
+WICHTIG: Die Programme wurden bereits durch ein strenges fachliches Filter-System vorgefiltert.
+Alle Programme sind rechtlich und praktisch für den angegebenen Einsatzbereich geeignet.
+Deine Aufgabe ist NUR die Bewertung und Erklärung - NICHT das Filtern.
+
 PROJEKTDATEN:
 - Bundesland: ${projectData.federalState}
 - Projekttyp: ${projectData.projectType}
-- Beschreibung: ${projectData.description}
-- Maßnahmen: ${projectData.measures.join(', ') || 'keine'}
-- Budget: ${projectData.budget || 'nicht angegeben'}
+- Einsatzbereich: ${projectData.einsatzbereich || 'nicht angegeben'}
+- Maßnahmen: ${(projectData.measures || []).join(', ') || 'keine'}
 
-VERFÜGBARE PROGRAMME:
+VORGEFILTERTE PROGRAMME (alle fachlich geeignet):
 ${JSON.stringify(programList, null, 2)}
 
 AUFGABE:
-Analysiere KRITISCH welche Programme WIRKLICH passen. Wähle nur 5-8 Programme aus, die einen FitScore von mindestens 65% haben.
+Bewerte ALLE ${programList.length} Programme. Alle sind bereits fachlich geprüft und geeignet.
+Vergib realistische Bewertungen basierend auf:
 
-WICHTIG - Nur Programme empfehlen wenn:
-- Der Projekttyp explizit gefördert wird
-- Das Bundesland passt (Landes-Programme nur für das spezifische Land)
-- Die Maßnahmen zum Programm passen
-- Das Budget realistisch ist
+1. **Einsatzbereich-Match**: Wie gut passt das Programm zum gewählten Einsatzbereich?
+2. **Praktische Anwendbarkeit**: Wie realistisch ist eine erfolgreiche Antragstellung?
+3. **Förderwahrscheinlichkeit**: Basierend auf Programmausrichtung und Projektdetails
+4. **Landesspezifität**: Landesspezifische Programme oft passgenauer als bundesweite
 
-Für jedes ausgewählte Programm gib zurück:
+BEWERTUNGSKRITERIEN:
+- 85-95: Perfekte Passung zum Einsatzbereich, sehr hohe Erfolgswahrscheinlichkeit
+- 75-84: Sehr gute Passung, gute Erfolgswahrscheinlichkeit  
+- 65-74: Gute Passung, mittlere Erfolgswahrscheinlichkeit
+- 55-64: Mäßige Passung, aber durchaus möglich
+- 45-54: Schwächere Passung, aber grundsätzlich förderfähig
+
+Für JEDES Programm gib zurück:
 - index: Die Nummer aus der Liste (WICHTIG!)
-- fitScore: Passung 0-100
-- eligibility: "Förderfähig" / "Nicht förderfähig" / "Unklar"
-- whyItFits: 3-5 Gründe als Array
-- nextSteps: 5-8 Schritte als Array
-- risks: 2-4 Risiken als Array
+- fitScore: Passung 45-95 (basierend auf obigen Kriterien)
+- eligibility: "Förderfähig" (alle Programme sind bereits geprüft)
+- whyItFits: 3-5 spezifische Gründe als Array
+- nextSteps: 5-8 konkrete Schritte als Array (IMMER mit "Detaillierte Planung des Spielplatzes unter Berücksichtigung der Förderrichtlinien" als ersten Schritt)
 - missingInfo: Fehlende Infos als Array
+- relevanceReason: Kurze Erklärung der Bewertung (1-2 Sätze)
+
+WICHTIG für nextSteps: 
+- Erster Schritt ist IMMER: "Detaillierte Planung des Spielplatzes unter Berücksichtigung der Förderrichtlinien"
+- Zweiter Schritt ist IMMER: "Prüfung von Zuständigkeit, Einreichungsweg und formalen Anforderungen des Förderantrags"
+- Gib NUR diese zwei Schritte zurück, keine weiteren Schritte
 
 Antworte NUR mit JSON:
 {
@@ -123,7 +170,6 @@ Antworte NUR mit JSON:
       "eligibility": "Förderfähig",
       "whyItFits": ["..."],
       "nextSteps": ["..."],
-      "risks": ["..."],
       "missingInfo": ["..."]
     }
   ]
@@ -148,33 +194,66 @@ Antworte NUR mit JSON:
     
     // Map indices back to full program data
     if (analysis.programs) {
-      analysis.programs = analysis.programs
-        .map(aiProgram => {
-          const dbProgram = relevantPrograms[aiProgram.index];
-          
-          if (!dbProgram) {
-            console.warn(`Invalid index: ${aiProgram.index}`);
-            return null;
-          }
-          
+      const aiProgramsMap = new Map(analysis.programs.map(p => [p.index, p]));
+      
+      // Ensure ALL filtered programs are included
+      analysis.programs = programsForAI.map((dbProgram, index) => {
+        const aiProgram = aiProgramsMap.get(index);
+        
+        if (!aiProgram) {
+          // If AI didn't return this program, add it with default values
+          console.warn(`AI didn't return program at index ${index}, adding with defaults`);
           return {
             name: dbProgram.name,
             source: dbProgram.source,
             fundingRate: dbProgram.fundingRate,
             description: dbProgram.description,
-            fitScore: aiProgram.fitScore,
-            eligibility: aiProgram.eligibility,
-            whyItFits: aiProgram.whyItFits,
-            nextSteps: aiProgram.nextSteps,
-            risks: aiProgram.risks,
-            missingInfo: aiProgram.missingInfo
+            fitScore: 70, // Default score
+            eligibility: "Unklar",
+            whyItFits: ["Programm wurde vorgefiltert und erfüllt grundlegende Kriterien"],
+            nextSteps: enhanceNextSteps(["Projektkonzept erstellen"]),
+            missingInfo: ["Detaillierte Förderbedingungen"],
+            // Add relevance metadata
+            relevanceLevel: dbProgram.relevanceLevel || 3,
+            isFederalStateSpecific: dbProgram.isFederalStateSpecific || false,
+            playgroundFundingHistory: dbProgram.playgroundFundingHistory || false,
+            federalStates: dbProgram.federalStates,
+            category: assignCategory(dbProgram) // Use funding logic to assign category
           };
-        })
-        .filter(p => p !== null)
-        .filter(p => p.fitScore >= 60) // Nur Programme mit mindestens 60% Fit
-        .sort((a, b) => b.fitScore - a.fitScore); // Sortiere nach Fit-Score
+        }
+        
+        return {
+          name: dbProgram.name,
+          source: dbProgram.source,
+          fundingRate: dbProgram.fundingRate,
+          description: dbProgram.description,
+          fitScore: aiProgram.fitScore,
+          eligibility: aiProgram.eligibility,
+          whyItFits: aiProgram.whyItFits,
+          nextSteps: enhanceNextSteps(aiProgram.nextSteps),
+          missingInfo: aiProgram.missingInfo,
+          relevanceReason: aiProgram.relevanceReason || "Programm wurde vorgefiltert und erfüllt grundlegende Kriterien",
+          isStateSpecific: dbProgram.isStateSpecific,
+          // Add relevance metadata from RelevanceEngine
+          relevanceLevel: dbProgram.relevanceLevel || 3,
+          isFederalStateSpecific: dbProgram.isFederalStateSpecific || false,
+          playgroundFundingHistory: dbProgram.playgroundFundingHistory || false,
+          federalStates: dbProgram.federalStates,
+          category: assignCategory(dbProgram) // Use funding logic to assign category
+        };
+      });
       
-      console.log('Final programs with sources:', analysis.programs.map(p => ({ name: p.name, score: p.fitScore, source: p.source })));
+      console.log(`Ensured all ${programsForAI.length} programs are included in results`);
+      
+      // Programs are already sorted by the simple filter service
+      console.log('Programs already sorted by priority: state-specific first, then federal');
+      
+      console.log('Final programs:', analysis.programs.map(p => ({ 
+        name: p.name, 
+        score: p.fitScore, 
+        priority: p.priority || 'N/A',
+        locationType: p.locationType || 'N/A'
+      })));
     }
     
     // Add combination advice if needed
@@ -194,63 +273,68 @@ Antworte NUR mit JSON:
 
 
 // Mock analysis for testing without API key
-const getMockAnalysis = (projectData) => {
-  return {
-    programs: [
-      {
-        name: "Städtebauförderung - Lebendige Zentren",
-        fitScore: 85,
-        eligibility: "Förderfähig",
-        whyItFits: [
-          "Ihr Projekt passt zur Aufwertung öffentlicher Räume",
-          "Spielplätze sind förderfähige Maßnahmen",
-          "Barrierefreiheit wird besonders gefördert",
-          "Bundesweites Programm verfügbar"
-        ],
-        nextSteps: [
-          "Projektskizze erstellen (2-3 Seiten)",
-          "Kostenschätzung durch Fachplaner",
-          "Gemeinderatsbeschluss einholen",
-          "Antrag bei zuständiger Bewilligungsstelle einreichen",
-          "Förderzusage abwarten (ca. 3-6 Monate)",
-          "Erst nach Bewilligung mit Baumaßnahmen beginnen"
-        ],
-        risks: [
-          "Nicht vor Bewilligung mit Bau beginnen - sonst keine Förderung",
-          "Fristen für Mittelabruf beachten",
-          "Dokumentationspflichten während der Bauphase"
-        ],
-        missingInfo: [
-          "Genaue Lage im Stadtgebiet (Fördergebiet?)",
-          "Ist das Gebiet bereits als Fördergebiet ausgewiesen?"
-        ],
-        source: "https://www.staedtebaufoerderung.info"
-      },
-      {
-        name: "Soziale Stadt - Zusammenhalt im Quartier",
-        fitScore: 78,
-        eligibility: "Förderfähig",
-        whyItFits: [
-          "Spielplätze fördern soziale Integration",
-          "Quartiersaufwertung ist Programmziel",
-          "Hohe Förderquote möglich (bis 80%)"
-        ],
-        nextSteps: [
-          "Prüfen ob Ihr Quartier Fördergebiet ist",
-          "Kontakt zum Quartiersmanagement aufnehmen",
-          "Bürgerbeteiligung durchführen",
-          "Antrag über Quartiersmanagement stellen"
-        ],
-        risks: [
-          "Nur in ausgewiesenen Fördergebieten möglich",
-          "Bürgerbeteiligung ist Pflicht"
-        ],
-        missingInfo: [
-          "Liegt das Projekt in einem Fördergebiet 'Soziale Stadt'?"
-        ],
-        source: "https://www.staedtebaufoerderung.info"
-      }
+const getMockAnalysis = (projectData, relevanceEngine = null) => {
+  console.log('=== USING MOCK ANALYSIS ===');
+  
+  // Apply simple filtering even in mock mode
+  let filteredPrograms;
+  try {
+    console.log('🎯 Mock: Using simple filter service');
+    filteredPrograms = simpleFilterPrograms(
+      projectData.einsatzbereich,
+      projectData.federalState,
+      fundingPrograms
+    );
+  } catch (error) {
+    console.error('❌ Mock simple filtering failed, using legacy fallback:', error);
+    filteredPrograms = strictFilterProgramsWithRelevance(
+      projectData.einsatzbereich,
+      projectData.federalState,
+      fundingPrograms,
+      null
+    );
+  }
+  
+  console.log(`Mock: Filter result: ${filteredPrograms.length} programs`);
+  
+  if (filteredPrograms.length === 0) {
+    return {
+      programs: [],
+      message: 'Keine Programme entsprechen den Filterkriterien für diesen Einsatzbereich'
+    };
+  }
+  
+  // Create mock analysis for filtered programs
+  const mockPrograms = filteredPrograms.slice(0, 10).map((program, index) => ({
+    name: program.name,
+    source: program.source,
+    fundingRate: program.fundingRate,
+    description: program.description,
+    fitScore: 85 - (index * 5), // Decreasing scores
+    eligibility: "Förderfähig",
+    whyItFits: [
+      `Programm ist fachlich geeignet für ${projectData.einsatzbereich}`,
+      `Verfügbar in ${projectData.federalState}`,
+      `Unterstützt Neubau von Spielplätzen`,
+      "Wurde durch strenges Filter-System validiert"
     ],
+    nextSteps: enhanceNextSteps([]),
+    missingInfo: [
+      "Genaue Projektkosten",
+      "Detaillierte Standortplanung"
+    ],
+    relevanceReason: "Programm wurde durch erweiterte Relevanzlogik als geeignet eingestuft",
+    isStateSpecific: program.federalStates && !program.federalStates.includes('all'),
+    // Add relevance metadata
+    relevanceLevel: program.relevanceLevel || 3,
+    isFederalStateSpecific: program.isFederalStateSpecific || false,
+    playgroundFundingHistory: program.playgroundFundingHistory || false,
+    federalStates: program.federalStates,
+    category: assignCategory(program) // Use funding logic to assign category
+  }));
+
+  return {
+    programs: mockPrograms,
     combinationAdvice: projectData.projectType === 'combination' 
       ? "Bei Kombiprojekten empfehlen wir eine getrennte Förderung: Spielplatz über Städtebauförderung, Fitness-Bereich über Sportstättenförderung. So maximieren Sie die Fördersumme."
       : null
@@ -264,7 +348,7 @@ export const analyzeProgramDetails = async (program, projectData) => {
     return getMockProgramDetails(program);
   }
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
   const prompt = `
 Du bist ein Experte für Fördermittelanträge in Deutschland.
@@ -277,6 +361,12 @@ ${JSON.stringify(projectData, null, 2)}
 
 AUFGABE:
 Erstelle eine detaillierte Anleitung für die Beantragung dieses Förderprogramms.
+
+WICHTIGE HINWEISE:
+- Verwende KEINE Texte wie "Einholung von Vergleichsangeboten" oder ähnliche Formulierungen
+- Verwende KEINE Emojis wie ⏰ in den Schritten
+- Halte die Schritte klar und einfach
+- Keine Links oder URLs in den Antworten
 
 Gib zurück (als JSON):
 {
@@ -355,7 +445,7 @@ const getMockProgramDetails = (program) => {
       {
         name: "Kostenschätzung / Kostenplan",
         description: "Detaillierte Aufstellung aller Kosten (Planung, Bau, Ausstattung)",
-        where: "Architekt, Landschaftsplaner oder Fachplaner"
+        where: "Spielbau GmbH oder andere Fachplaner"
       },
       {
         name: "Lageplan",
@@ -377,7 +467,7 @@ const getMockProgramDetails = (program) => {
       {
         name: "Förderantrag",
         description: "Offizielles Antragsformular des Förderprogramms",
-        url: program.source,
+        url: null,
         howToGet: "Download von der Programm-Website oder bei der Bewilligungsstelle anfordern"
       },
       {
@@ -400,7 +490,7 @@ const getMockProgramDetails = (program) => {
       },
       {
         action: "Kostenschätzung einholen",
-        details: "Angebote von Planern/Architekten einholen, Kostenplan erstellen",
+        details: "Spielplatz mithilfe von Spielbau GmbH planen und Angebot erhalten",
         deadline: null
       },
       {
@@ -435,7 +525,7 @@ const getMockProgramDetails = (program) => {
         organization: "Zuständige Landesbehörde oder Förderbank",
         phone: null,
         email: null,
-        website: program.source
+        website: null
       }
     ],
     deadlines: [
